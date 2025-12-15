@@ -1,0 +1,67 @@
+name: Code Quality
+
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  pre_commit:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install dev deps
+        run: uv sync --group dev
+
+      - name: Install system tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format clang-tidy ninja-build
+
+      - name: Run pre-commit
+        run: uv run pre-commit run --all-files
+
+  clang_format:
+    name: clang-format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        shell: bash
+        run: |
+          files=$(git ls-files "*.cpp" "*.hpp")
+          clang-format --dry-run --Werror $files
+
+  clang_tidy:
+    name: clang-tidy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-tidy and ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy ninja-build
+
+      - name: Configure (Ninja Debug)
+        run: cmake --preset ninja-debug
+
+      - name: Run clang-tidy
+        shell: bash
+        run: |
+          clang-tidy -p build/ninja-debug src/main.cpp src/core/greeting.cpp src/utils/string_utils.cpp

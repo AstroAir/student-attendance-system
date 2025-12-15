@@ -1,0 +1,7 @@
+function(print_conan_instructions)
+  message(STATUS "Conan integration is supported via toolchain.")
+  message(STATUS "Example (Conan 2):")
+  message(STATUS "  conan profile detect --force")
+  message(STATUS "  conan install . -of build/conan -s build_type=Debug --build=missing")
+  message(STATUS "  cmake -S . -B build/cmake -DCMAKE_TOOLCHAIN_FILE=build/conan/conan_toolchain.cmake")
+endfunction()

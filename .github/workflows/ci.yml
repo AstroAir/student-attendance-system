@@ -1,0 +1,102 @@
+name: CI
+
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  cmake:
+    name: CMake (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            configure_preset: ninja-ci
+            build_preset: ninja-ci
+            test_preset: ninja-ci
+          - os: macos-latest
+            configure_preset: ninja-ci
+            build_preset: ninja-ci
+            test_preset: ninja-ci
+          - os: windows-latest
+            configure_preset: vs-debug
+            build_preset: vs-debug
+            test_preset: vs-debug
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.configure_preset }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.build_preset }}
+
+      - name: Test
+        run: ctest --preset ${{ matrix.test_preset }}
+
+  docs:
+    name: Docs (mkdocs)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install docs deps
+        run: uv sync --group docs
+
+      - name: Build docs (mkdocs)
+        run: uv run mkdocs build -f mkdocs.yml -d build/mkdocs
+
+      - name: Configure (CMake Ninja CI)
+        run: cmake --preset ninja-ci
+
+      - name: Build docs (CMake target)
+        run: cmake --build --preset ninja-ci --target docs
+
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mkdocs-site
+          path: build/mkdocs
+
+  xmake:
+    name: xmake (ubuntu-latest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install docs deps
+        run: uv sync --group docs
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Configure
+        run: xmake f -m release --build_tests=y --build_examples=y
+
+      - name: Build
+        run: xmake
+
+      - name: Run unit tests
+        run: xmake run unit_tests
+
+      - name: Run integration tests
+        run: xmake run integration_tests
+
+      - name: Build docs (xmake task)
+        run: xmake docs -o build/mkdocs-xmake

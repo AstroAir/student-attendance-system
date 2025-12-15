@@ -1,0 +1,21 @@
+site_name: cpp-quick-starter
+site_url: https://example.com
+repo_name: cpp-quick-starter
+repo_url: https://github.com/your-org/cpp-quick-starter
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Guides:
+      - Getting Started: guides/getting-started.md
+      - CMake: guides/cmake.md
+      - XMake: guides/xmake.md
+      - Testing: guides/testing.md
+      - Benchmarks: guides/benchmarks.md
+      - Code Quality: guides/code-quality.md
+  - API Reference: api/index.md
+
+plugins:
+  - search

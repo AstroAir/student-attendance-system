@@ -1,0 +1,183 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "uv Sync (workspace)",
+      "type": "shell",
+      "command": "uv",
+      "args": ["sync", "--group", "docs", "--group", "dev"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "pre-commit (all files)",
+      "type": "shell",
+      "command": "uv",
+      "args": ["run", "pre-commit", "run", "--all-files"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["uv Sync (workspace)"],
+      "problemMatcher": []
+    },
+    {
+      "label": "pre-commit Install Hooks",
+      "type": "shell",
+      "command": "uv",
+      "args": ["run", "pre-commit", "install"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["uv Sync (workspace)"],
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake Configure (vs-debug)",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--preset", "vs-debug"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake Configure (clangd-msvc)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$vsDevCmd = Join-Path $env:ProgramFiles 'Microsoft Visual Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat'; cmd /c \"\"$vsDevCmd\" -arch=x64 -host_arch=x64 && cmake --preset clangd-msvc\""
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake Build (vs-debug)",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "--preset", "vs-debug"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["CMake Configure (vs-debug)"],
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake Build (clangd-msvc)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$vsDevCmd = Join-Path $env:ProgramFiles 'Microsoft Visual Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat'; cmd /c \"\"$vsDevCmd\" -arch=x64 -host_arch=x64 && cmake --build --preset clangd-msvc\""
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["CMake Configure (clangd-msvc)"],
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake Test (vs-debug)",
+      "type": "shell",
+      "command": "ctest",
+      "args": ["--preset", "vs-debug"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["CMake Build (vs-debug)"],
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake Docs (target docs)",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "--preset", "vs-debug", "--target", "docs"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["uv Sync (workspace)", "CMake Configure (vs-debug)"],
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake Clean Cache (build)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "if (Test-Path build\\CMakeCache.txt) { Remove-Item -Force build\\CMakeCache.txt }; if (Test-Path build\\CMakeFiles) { Remove-Item -Recurse -Force build\\CMakeFiles }"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "xmake Configure (release)",
+      "type": "shell",
+      "command": "xmake",
+      "args": ["f", "-m", "release", "--build_tests=y", "--build_examples=y"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "xmake Build",
+      "type": "shell",
+      "command": "xmake",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["xmake Configure (release)"],
+      "problemMatcher": []
+    },
+    {
+      "label": "xmake Run unit_tests",
+      "type": "shell",
+      "command": "xmake",
+      "args": ["run", "unit_tests"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["xmake Build"],
+      "problemMatcher": []
+    },
+    {
+      "label": "xmake Run integration_tests",
+      "type": "shell",
+      "command": "xmake",
+      "args": ["run", "integration_tests"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["xmake Build"],
+      "problemMatcher": []
+    },
+    {
+      "label": "xmake Docs",
+      "type": "shell",
+      "command": "xmake",
+      "args": ["docs", "-o", "build/mkdocs-xmake"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["uv Sync (workspace)"],
+      "problemMatcher": []
+    }
+  ]
+}

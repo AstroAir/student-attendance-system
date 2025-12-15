@@ -1,0 +1,88 @@
+## C/C++ compilation outputs
+*.d
+
+*.slo
+*.lo
+*.o
+*.obj
+
+*.gch
+*.pch
+
+*.ilk
+*.pdb
+*.dwo
+
+*.so
+*.dylib
+*.dll
+
+*.mod
+*.smod
+
+*.lai
+*.la
+*.a
+*.lib
+
+*.exe
+*.out
+*.app
+
+## Build directories
+build/
+cmake-build-*/
+out/
+
+## Build system generated files (CMake / CTest)
+CMakeFiles/
+CMakeCache.txt
+CMakeUserPresets.json
+cmake_install.cmake
+install_manifest.txt
+Makefile
+CTestTestfile.cmake
+DartConfiguration.tcl
+Testing/
+
+## Build system generated files (Ninja)
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
+
+## Tooling
+compile_commands.json
+
+## Package managers
+conan.lock
+conanbuildinfo.*
+conaninfo.txt
+graph_info.json
+
+vcpkg_installed/
+
+## IDE / editors
+.vs/
+.idea/
+
+*.VC.db
+*.VC.VC.opendb
+*.suo
+*.user
+
+## Caches
+.cache/
+.xmake/
+
+## Coverage / profiling outputs
+*.gcda
+*.gcno
+*.gcov
+lcov.info
+coverage/
+*.profraw
+*.profdata
+
+## Documentation site output (MkDocs)
+site/
