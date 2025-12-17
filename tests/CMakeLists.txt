@@ -1,14 +1,4 @@
-add_executable(unit_tests
-  unit/main.cpp
-  unit/greeting_test.cpp
-  unit/string_utils_test.cpp
-)
-
-target_link_libraries(unit_tests
-  PRIVATE
-    cpp_quick_starter::cpp_quick_starter
-)
-
+# Find GTest target
 set(_gtest_target "")
 if(TARGET GTest::gtest)
   set(_gtest_target GTest::gtest)
@@ -20,26 +10,30 @@ if(NOT _gtest_target)
   message(FATAL_ERROR "GoogleTest target not found. Ensure GTest is available (FetchContent/vcpkg/Conan).")
 endif()
 
-target_link_libraries(unit_tests PRIVATE ${_gtest_target})
-
 include(GoogleTest)
 
-gtest_discover_tests(unit_tests
-  DISCOVERY_MODE PRE_TEST
-)
+# ==================== API Tests ====================
+if(STUDENT_ATTENDANCE_BUILD_SERVER AND TARGET student_attendance::server_lib)
+  add_executable(api_tests
+    api/main.cpp
+    api/student_api_test.cpp
+    api/attendance_api_test.cpp
+    api/report_api_test.cpp
+    api/data_api_test.cpp
+    api/class_api_test.cpp
+    api/auth_api_test.cpp
+    api/models_test.cpp
+    api/utils_test.cpp
+    api/database_test.cpp
+  )
 
-add_executable(integration_tests
-  integration/main.cpp
-  integration/smoke_test.cpp
-)
+  target_link_libraries(api_tests
+    PRIVATE
+      student_attendance::server_lib
+      ${_gtest_target}
+  )
 
-target_link_libraries(integration_tests
-  PRIVATE
-    cpp_quick_starter::cpp_quick_starter
-)
-
-target_link_libraries(integration_tests PRIVATE ${_gtest_target})
-
-gtest_discover_tests(integration_tests
-  DISCOVERY_MODE PRE_TEST
-)
+  gtest_discover_tests(api_tests
+    DISCOVERY_MODE PRE_TEST
+  )
+endif()

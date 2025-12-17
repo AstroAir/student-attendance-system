@@ -4,7 +4,7 @@ if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
 
-project(cpp_quick_starter VERSION 0.1.0 LANGUAGES CXX)
+project(student_attendance_system VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,78 +14,164 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-option(CPP_QUICK_STARTER_ENABLE_WARNINGS "Enable compiler warnings" ON)
-option(CPP_QUICK_STARTER_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
-option(CPP_QUICK_STARTER_ENABLE_SANITIZERS "Enable sanitizers" OFF)
-option(CPP_QUICK_STARTER_ENABLE_CLANG_TIDY "Enable clang-tidy" OFF)
-option(CPP_QUICK_STARTER_ENABLE_CPPCHECK "Enable cppcheck" OFF)
+option(STUDENT_ATTENDANCE_ENABLE_WARNINGS "Enable compiler warnings" ON)
+option(STUDENT_ATTENDANCE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
+option(STUDENT_ATTENDANCE_ENABLE_SANITIZERS "Enable sanitizers" OFF)
+option(STUDENT_ATTENDANCE_ENABLE_CLANG_TIDY "Enable clang-tidy" OFF)
+option(STUDENT_ATTENDANCE_ENABLE_CPPCHECK "Enable cppcheck" OFF)
 
-option(CPP_QUICK_STARTER_BUILD_TESTS "Build unit/integration tests" ON)
-option(CPP_QUICK_STARTER_BUILD_BENCHMARKS "Build benchmarks" OFF)
-option(CPP_QUICK_STARTER_BUILD_EXAMPLES "Build examples" ON)
-option(CPP_QUICK_STARTER_BUILD_DOCS "Build docs (Doxygen)" OFF)
+option(STUDENT_ATTENDANCE_BUILD_SERVER "Build attendance server" ON)
+option(STUDENT_ATTENDANCE_BUILD_TESTS "Build unit/integration tests" ON)
+option(STUDENT_ATTENDANCE_BUILD_BENCHMARKS "Build benchmarks" OFF)
+option(STUDENT_ATTENDANCE_BUILD_EXAMPLES "Build examples" ON)
+option(STUDENT_ATTENDANCE_BUILD_DOCS "Build docs (Doxygen)" OFF)
 
-option(CPP_QUICK_STARTER_ENABLE_MKDOCS "Enable MkDocs targets" ON)
+option(STUDENT_ATTENDANCE_ENABLE_MKDOCS "Enable MkDocs targets" ON)
 
-set(_cpp_quick_starter_default_use_system_packages OFF)
+set(_student_attendance_default_use_system_packages OFF)
 if(MINGW)
-  set(_cpp_quick_starter_default_use_system_packages ON)
+  set(_student_attendance_default_use_system_packages ON)
 endif()
 
-option(CPP_QUICK_STARTER_USE_SYSTEM_GTEST "Use system-installed GTest instead of FetchContent" ${_cpp_quick_starter_default_use_system_packages})
-option(CPP_QUICK_STARTER_USE_SYSTEM_BENCHMARK "Use system-installed benchmark instead of FetchContent" ${_cpp_quick_starter_default_use_system_packages})
+option(STUDENT_ATTENDANCE_USE_SYSTEM_GTEST "Use system-installed GTest instead of FetchContent" ${_student_attendance_default_use_system_packages})
+option(STUDENT_ATTENDANCE_USE_SYSTEM_BENCHMARK "Use system-installed benchmark instead of FetchContent" ${_student_attendance_default_use_system_packages})
+option(STUDENT_ATTENDANCE_USE_SYSTEM_DROGON "Use system-installed Drogon instead of FetchContent" ${_student_attendance_default_use_system_packages})
 
-add_library(cpp_quick_starter
-  src/core/greeting.cpp
-  src/utils/string_utils.cpp
-)
-add_library(cpp_quick_starter::cpp_quick_starter ALIAS cpp_quick_starter)
+# Main application (help/info only)
+add_executable(student_attendance_app src/main.cpp)
 
-target_include_directories(cpp_quick_starter
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-target_compile_features(cpp_quick_starter PUBLIC cxx_std_20)
-
-if(CPP_QUICK_STARTER_ENABLE_WARNINGS)
+if(STUDENT_ATTENDANCE_ENABLE_WARNINGS)
   include(CompilerWarnings)
-  set_project_warnings(cpp_quick_starter ${CPP_QUICK_STARTER_WARNINGS_AS_ERRORS})
+  set_project_warnings(student_attendance_app ${STUDENT_ATTENDANCE_WARNINGS_AS_ERRORS})
 endif()
 
-if(CPP_QUICK_STARTER_ENABLE_SANITIZERS)
+if(STUDENT_ATTENDANCE_ENABLE_SANITIZERS)
   include(Sanitizers)
-  enable_sanitizers(cpp_quick_starter)
+  enable_sanitizers(student_attendance_app)
 endif()
 
 include(StaticAnalyzers)
-if(CPP_QUICK_STARTER_ENABLE_CLANG_TIDY)
+if(STUDENT_ATTENDANCE_ENABLE_CLANG_TIDY)
   enable_clang_tidy()
 endif()
-if(CPP_QUICK_STARTER_ENABLE_CPPCHECK)
+if(STUDENT_ATTENDANCE_ENABLE_CPPCHECK)
   enable_cppcheck()
-endif()
-
-add_executable(cpp_quick_starter_app src/main.cpp)
-target_link_libraries(cpp_quick_starter_app PRIVATE cpp_quick_starter::cpp_quick_starter)
-
-if(CPP_QUICK_STARTER_BUILD_EXAMPLES)
-  add_executable(example_01 examples/example_01.cpp)
-  target_link_libraries(example_01 PRIVATE cpp_quick_starter::cpp_quick_starter)
 endif()
 
 include(FetchContent)
 
-if(CPP_QUICK_STARTER_BUILD_TESTS)
+# Configure FetchContent cache directory for faster rebuilds
+if(NOT FETCHCONTENT_BASE_DIR)
+  set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/.cache/fetchcontent" CACHE PATH "FetchContent base dir")
+endif()
+
+# Enable FetchContent fully disconnected mode if sources already exist
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL "" FORCE)
+
+# ==================== Drogon Server ====================
+if(STUDENT_ATTENDANCE_BUILD_SERVER)
+  set(_student_attendance_use_system_drogon ${STUDENT_ATTENDANCE_USE_SYSTEM_DROGON})
+  if(MSVC)
+    set(_student_attendance_use_system_drogon OFF)
+  endif()
+
+  if(_student_attendance_use_system_drogon)
+    find_package(Drogon CONFIG QUIET)
+  endif()
+
+  if(NOT Drogon_FOUND)
+    # Check if drogon was already fetched
+    if(EXISTS "${FETCHCONTENT_BASE_DIR}/drogon-src")
+      message(STATUS "Using cached Drogon from ${FETCHCONTENT_BASE_DIR}/drogon-src")
+    else()
+      message(STATUS "Drogon not found, fetching from GitHub (will be cached for future builds)...")
+    endif()
+
+    FetchContent_Declare(drogon
+      GIT_REPOSITORY https://github.com/drogonframework/drogon.git
+      GIT_TAG v1.9.8
+      GIT_SHALLOW TRUE
+      GIT_PROGRESS TRUE
+    )
+
+    # Drogon build options
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_CTL ON CACHE BOOL "" FORCE)
+    set(BUILD_ORM ON CACHE BOOL "" FORCE)
+    set(BUILD_POSTGRESQL OFF CACHE BOOL "" FORCE)
+    set(BUILD_MYSQL OFF CACHE BOOL "" FORCE)
+    set(BUILD_SQLITE ON CACHE BOOL "" FORCE)
+    set(BUILD_REDIS OFF CACHE BOOL "" FORCE)
+
+    FetchContent_MakeAvailable(drogon)
+  endif()
+
+  # Server library
+  add_library(student_attendance_server_lib
+    # Database
+    src/db/DatabaseManager.cc
+    # Legacy in-memory store (fallback)
+    src/models/DataStore.cc
+    # Services
+    src/services/AuthService.cc
+    src/services/StudentService.cc
+    src/services/AttendanceService.cc
+    src/services/ReportService.cc
+    # Controllers
+    src/controllers/AuthController.cc
+    src/controllers/StudentController.cc
+    src/controllers/AttendanceController.cc
+    src/controllers/ReportController.cc
+    src/controllers/DataController.cc
+    src/controllers/ClassController.cc
+    # Filters
+    src/filters/AuthFilter.cc
+  )
+  add_library(student_attendance::server_lib ALIAS student_attendance_server_lib)
+
+  target_include_directories(student_attendance_server_lib
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  )
+
+  # Link Drogon - handle both FetchContent and find_package cases
+  if(TARGET Drogon::Drogon)
+    target_link_libraries(student_attendance_server_lib PUBLIC Drogon::Drogon)
+  elseif(TARGET Drogon)
+    target_link_libraries(student_attendance_server_lib PUBLIC Drogon)
+  elseif(TARGET drogon)
+    target_link_libraries(student_attendance_server_lib PUBLIC drogon)
+  elseif(TARGET drogon::drogon)
+    target_link_libraries(student_attendance_server_lib PUBLIC drogon::drogon)
+  else()
+    message(FATAL_ERROR "Drogon target not found")
+  endif()
+
+  target_compile_features(student_attendance_server_lib PUBLIC cxx_std_20)
+
+  # Server executable
+  add_executable(student_attendance_server src/server_main.cpp)
+  target_link_libraries(student_attendance_server PRIVATE student_attendance::server_lib)
+
+  # Copy config file
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/config.json
+    ${CMAKE_CURRENT_BINARY_DIR}/config.json
+    COPYONLY
+  )
+endif()
+
+# ==================== Tests ====================
+if(STUDENT_ATTENDANCE_BUILD_TESTS)
   include(CTest)
   enable_testing()
 
-  set(_cpp_quick_starter_use_system_gtest ${CPP_QUICK_STARTER_USE_SYSTEM_GTEST})
+  set(_student_attendance_use_system_gtest ${STUDENT_ATTENDANCE_USE_SYSTEM_GTEST})
   if(MSVC)
-    set(_cpp_quick_starter_use_system_gtest OFF)
+    set(_student_attendance_use_system_gtest OFF)
   endif()
 
-  if(_cpp_quick_starter_use_system_gtest)
+  if(_student_attendance_use_system_gtest)
     find_package(GTest CONFIG QUIET)
   endif()
 
@@ -100,13 +186,14 @@ if(CPP_QUICK_STARTER_BUILD_TESTS)
   add_subdirectory(tests)
 endif()
 
-if(CPP_QUICK_STARTER_BUILD_BENCHMARKS)
-  set(_cpp_quick_starter_use_system_benchmark ${CPP_QUICK_STARTER_USE_SYSTEM_BENCHMARK})
+# ==================== Benchmarks ====================
+if(STUDENT_ATTENDANCE_BUILD_BENCHMARKS)
+  set(_student_attendance_use_system_benchmark ${STUDENT_ATTENDANCE_USE_SYSTEM_BENCHMARK})
   if(MSVC)
-    set(_cpp_quick_starter_use_system_benchmark OFF)
+    set(_student_attendance_use_system_benchmark OFF)
   endif()
 
-  if(_cpp_quick_starter_use_system_benchmark)
+  if(_student_attendance_use_system_benchmark)
     find_package(benchmark CONFIG QUIET)
   endif()
   if(NOT benchmark_FOUND)
@@ -121,12 +208,13 @@ if(CPP_QUICK_STARTER_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
 
-if(CPP_QUICK_STARTER_BUILD_DOCS)
+# ==================== Documentation ====================
+if(STUDENT_ATTENDANCE_BUILD_DOCS)
   include(Doxygen)
   add_doxygen_target()
 endif()
 
-if(CPP_QUICK_STARTER_ENABLE_MKDOCS)
+if(STUDENT_ATTENDANCE_ENABLE_MKDOCS)
   include(MkDocs)
   add_mkdocs_targets(
     CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/mkdocs.yml"

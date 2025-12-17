@@ -1,7 +1,9 @@
 {
-  "name": "cpp-quick-starter",
-  "version-string": "0.1.0",
+  "name": "student-attendance-system",
+  "version-string": "1.0.0",
   "dependencies": [
+    "drogon",
+    "jsoncpp",
     "gtest",
     "benchmark"
   ]

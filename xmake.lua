@@ -1,8 +1,14 @@
-set_project("cpp-quick-starter")
-set_version("0.1.0")
+set_project("student-attendance-system")
+set_version("1.0.0")
 
 set_languages("cxx20")
 add_rules("mode.debug", "mode.release")
+
+option("build_server")
+  set_default(true)
+  set_showmenu(true)
+  set_description("Build attendance server")
+option_end()
 
 option("build_tests")
   set_default(true)
@@ -22,14 +28,10 @@ option("build_examples")
   set_description("Build examples")
 option_end()
 
-target("cpp_quick_starter")
-  set_kind("static")
-  add_headerfiles("include/(project_name/**.hpp)")
-  add_files("src/core/**.cpp", "src/utils/**.cpp")
-  add_includedirs("include", {public = true})
-  if is_mode("debug") then
-    add_defines("CPP_QUICK_STARTER_DEBUG", {public = true})
-  end
+-- Main app (help only)
+target("student_attendance_app")
+  set_kind("binary")
+  add_files("src/main.cpp")
 
   if is_plat("windows") then
     add_cxflags("/W4")
@@ -39,50 +41,45 @@ target("cpp_quick_starter")
 
 target_end()
 
-target("cpp_quick_starter_app")
-  set_kind("binary")
-  add_files("src/main.cpp")
-  add_deps("cpp_quick_starter")
+-- Server with Drogon
+if has_config("build_server") then
+  add_requires("drogon", {configs = {mysql = false, postgresql = false, sqlite3 = true}})
+  add_requires("jsoncpp")
 
-target_end()
+  target("student_attendance_server_lib")
+    set_kind("static")
+    add_headerfiles("include/(student_attendance/**.h)")
+    add_files(
+      "src/db/**.cc",
+      "src/models/**.cc",
+      "src/services/**.cc",
+      "src/controllers/**.cc"
+    )
+    add_includedirs("include", {public = true})
+    add_packages("drogon", "jsoncpp", {public = true})
 
-if has_config("build_examples") then
-  target("example_01")
+  target_end()
+
+  target("student_attendance_server")
     set_kind("binary")
-    add_files("examples/example_01.cpp")
-    add_deps("cpp_quick_starter")
+    add_files("src/server_main.cpp")
+    add_deps("student_attendance_server_lib")
+
+    after_build(function (target)
+      os.cp("$(projectdir)/config.json", target:targetdir())
+    end)
 
   target_end()
 end
 
-if has_config("build_tests") then
+if has_config("build_tests") and has_config("build_server") then
   add_requires("gtest")
 
-  target("unit_tests")
+  target("api_tests")
     set_kind("binary")
-    add_files("tests/unit/**.cpp")
-    add_deps("cpp_quick_starter")
+    add_files("tests/api/**.cpp")
+    add_deps("student_attendance_server_lib")
     add_packages("gtest")
-
-  target_end()
-
-  target("integration_tests")
-    set_kind("binary")
-    add_files("tests/integration/**.cpp")
-    add_deps("cpp_quick_starter")
-    add_packages("gtest")
-
-  target_end()
-end
-
-if has_config("build_benchmarks") then
-  add_requires("benchmark")
-
-  target("benchmarks")
-    set_kind("binary")
-    add_files("benchmarks/**.cpp")
-    add_deps("cpp_quick_starter")
-    add_packages("benchmark")
 
   target_end()
 end

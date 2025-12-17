@@ -32,8 +32,8 @@
       "inherits": "ninja-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CPP_QUICK_STARTER_BUILD_TESTS": "ON",
-        "CPP_QUICK_STARTER_BUILD_EXAMPLES": "ON"
+        "STUDENT_ATTENDANCE_BUILD_TESTS": "ON",
+        "STUDENT_ATTENDANCE_BUILD_EXAMPLES": "ON"
       }
     },
     {
@@ -42,8 +42,8 @@
       "inherits": "ninja-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "CPP_QUICK_STARTER_BUILD_TESTS": "OFF",
-        "CPP_QUICK_STARTER_BUILD_EXAMPLES": "ON"
+        "STUDENT_ATTENDANCE_BUILD_TESTS": "OFF",
+        "STUDENT_ATTENDANCE_BUILD_EXAMPLES": "ON"
       }
     },
     {
@@ -52,26 +52,22 @@
       "inherits": "ninja-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "CPP_QUICK_STARTER_ENABLE_WARNINGS": "ON",
-        "CPP_QUICK_STARTER_WARNINGS_AS_ERRORS": "ON",
-        "CPP_QUICK_STARTER_BUILD_TESTS": "ON",
-        "CPP_QUICK_STARTER_BUILD_EXAMPLES": "OFF",
-        "CPP_QUICK_STARTER_BUILD_BENCHMARKS": "OFF",
-        "CPP_QUICK_STARTER_BUILD_DOCS": "OFF"
+        "STUDENT_ATTENDANCE_ENABLE_WARNINGS": "ON",
+        "STUDENT_ATTENDANCE_WARNINGS_AS_ERRORS": "ON",
+        "STUDENT_ATTENDANCE_BUILD_TESTS": "ON",
+        "STUDENT_ATTENDANCE_BUILD_EXAMPLES": "OFF",
+        "STUDENT_ATTENDANCE_BUILD_BENCHMARKS": "OFF",
+        "STUDENT_ATTENDANCE_BUILD_DOCS": "OFF"
       }
     },
     {
       "name": "msys2-mingw64-base",
       "hidden": true,
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/msys2-mingw64",
-      "environment": {
-        "PATH": "${env:MSYS2_ROOT}/mingw64/bin;${penv:PATH}"
-      },
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++"
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/MSYS2MinGW64Toolchain.cmake"
       }
     },
     {
@@ -80,8 +76,18 @@
       "inherits": "msys2-mingw64-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CPP_QUICK_STARTER_BUILD_TESTS": "ON",
-        "CPP_QUICK_STARTER_BUILD_EXAMPLES": "ON"
+        "STUDENT_ATTENDANCE_BUILD_TESTS": "ON",
+        "STUDENT_ATTENDANCE_BUILD_EXAMPLES": "ON"
+      }
+    },
+    {
+      "name": "msys2-mingw64-release",
+      "displayName": "MSYS2 MinGW64 Release",
+      "inherits": "msys2-mingw64-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "STUDENT_ATTENDANCE_BUILD_TESTS": "OFF",
+        "STUDENT_ATTENDANCE_BUILD_EXAMPLES": "ON"
       }
     },
     {
@@ -99,8 +105,8 @@
       "displayName": "VS Debug",
       "inherits": "vs-base",
       "cacheVariables": {
-        "CPP_QUICK_STARTER_BUILD_TESTS": "ON",
-        "CPP_QUICK_STARTER_BUILD_EXAMPLES": "ON"
+        "STUDENT_ATTENDANCE_BUILD_TESTS": "ON",
+        "STUDENT_ATTENDANCE_BUILD_EXAMPLES": "ON"
       }
     },
     {
@@ -109,8 +115,8 @@
       "inherits": "clangd-msvc-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CPP_QUICK_STARTER_BUILD_TESTS": "ON",
-        "CPP_QUICK_STARTER_BUILD_EXAMPLES": "ON"
+        "STUDENT_ATTENDANCE_BUILD_TESTS": "ON",
+        "STUDENT_ATTENDANCE_BUILD_EXAMPLES": "ON"
       }
     },
     {
@@ -118,8 +124,8 @@
       "displayName": "VS Release",
       "inherits": "vs-base",
       "cacheVariables": {
-        "CPP_QUICK_STARTER_BUILD_TESTS": "OFF",
-        "CPP_QUICK_STARTER_BUILD_EXAMPLES": "ON"
+        "STUDENT_ATTENDANCE_BUILD_TESTS": "OFF",
+        "STUDENT_ATTENDANCE_BUILD_EXAMPLES": "ON"
       }
     }
   ],
@@ -135,6 +141,10 @@
     {
       "name": "msys2-mingw64-debug",
       "configurePreset": "msys2-mingw64-debug"
+    },
+    {
+      "name": "msys2-mingw64-release",
+      "configurePreset": "msys2-mingw64-release"
     },
     {
       "name": "ninja-release",
@@ -166,6 +176,13 @@
     {
       "name": "msys2-mingw64-debug",
       "configurePreset": "msys2-mingw64-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "msys2-mingw64-release",
+      "configurePreset": "msys2-mingw64-release",
       "output": {
         "outputOnFailure": true
       }

@@ -1,0 +1,46 @@
+{
+    "listeners": [
+        {
+            "address": "0.0.0.0",
+            "port": 8080,
+            "https": false
+        }
+    ],
+    "app": {
+        "threads_num": 4,
+        "enable_session": true,
+        "session_timeout": 86400,
+        "document_root": "./",
+        "upload_path": "uploads",
+        "file_types": [
+            "gif", "png", "jpg", "js", "css", "html", "ico", "swf",
+            "xap", "apk", "cur", "xml", "json", "csv"
+        ],
+        "max_connections": 100000,
+        "max_connections_per_ip": 0,
+        "load_dynamic_views": false,
+        "log": {
+            "log_path": "./logs",
+            "logfile_base_name": "attendance_server",
+            "log_size_limit": 100000000,
+            "log_level": "DEBUG"
+        },
+        "run_as_daemon": false,
+        "relaunch_on_error": false,
+        "use_sendfile": true,
+        "use_gzip": true,
+        "static_files_cache_time": 5,
+        "idle_connection_timeout": 60,
+        "enable_server_header": true,
+        "server_header_field": "Student-Attendance-Server/1.0"
+    },
+    "db_clients": [
+        {
+            "name": "default",
+            "rdbms": "sqlite3",
+            "filename": "./student_attendance.db",
+            "connection_number": 4,
+            "is_fast": false
+        }
+    ]
+}

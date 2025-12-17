@@ -1,0 +1,34 @@
+{
+  "rdbms": "sqlite3",
+  "filename": "./student_attendance.db",
+  "tables": [
+    {
+      "name": "students",
+      "schema": "",
+      "primaryKey": ["student_id"],
+      "autoIncrementPrimaryKey": false,
+      "columns": [
+        {"name": "student_id", "type": "TEXT", "notNull": true},
+        {"name": "name", "type": "TEXT", "notNull": true},
+        {"name": "class_name", "type": "TEXT", "notNull": true},
+        {"name": "created_at", "type": "DATETIME"},
+        {"name": "updated_at", "type": "DATETIME"}
+      ]
+    },
+    {
+      "name": "attendances",
+      "schema": "",
+      "primaryKey": ["id"],
+      "autoIncrementPrimaryKey": true,
+      "columns": [
+        {"name": "id", "type": "INTEGER", "notNull": true},
+        {"name": "student_id", "type": "TEXT", "notNull": true},
+        {"name": "date", "type": "TEXT", "notNull": true},
+        {"name": "status", "type": "TEXT", "notNull": true},
+        {"name": "remark", "type": "TEXT"},
+        {"name": "created_at", "type": "DATETIME"},
+        {"name": "updated_at", "type": "DATETIME"}
+      ]
+    }
+  ]
+}
