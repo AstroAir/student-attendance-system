@@ -24,6 +24,8 @@ servers:
     description: 本地开发服务器
 
 tags:
+  - name: auth
+    description: 用户认证
   - name: students
     description: 学生管理
   - name: attendances
@@ -36,6 +38,85 @@ tags:
     description: 班级管理
 
 paths:
+  # ==================== 认证 ====================
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: 用户登录
+      description: 使用用户名和密码登录系统
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: 用户名或密码错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: 用户退出
+      description: 退出当前登录会话
+      operationId: logout
+      responses:
+        '200':
+          description: 退出成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+
+  /auth/me:
+    get:
+      tags:
+        - auth
+      summary: 获取当前用户信息
+      description: 获取当前登录用户的信息
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: 成功获取用户信息
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   # ==================== 学生管理 ====================
   /students:
     get:
@@ -1160,6 +1241,38 @@ components:
               type: integer
             sick_leave_count:
               type: integer
+
+    # ==================== 认证相关 ====================
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: 用户名
+          example: "admin"
+        password:
+          type: string
+          description: 密码
+          example: "password123"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 用户ID
+          example: 1
+        username:
+          type: string
+          description: 用户名
+          example: "admin"
+        role:
+          type: string
+          description: 用户角色
+          example: "admin"
 
     # ==================== 其他 ====================
     ClassInfo:
